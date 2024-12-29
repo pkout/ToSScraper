@@ -1,3 +1,5 @@
+import os
+
 from enum import Enum
 from pathlib import Path
 
@@ -11,8 +13,9 @@ class Environment(Enum):
 
 class Settings:
 
-    def __init__(self, env=Environment.dev):
-        file_path = Path(__file__).parent / Path(f'settings.{env.value}.yaml')
+    def __init__(self, env=Environment.test):
+        file_path = Path(__file__).parent.parent / \
+            Path(f'settings.{env.value}.yaml')
 
         if not file_path.exists():
             raise ConfigurationFileNotFound(
@@ -23,11 +26,12 @@ class Settings:
             self._settings_dict = yaml.safe_load(f)
 
     def as_dict(self):
-        return self._settings_dict
+        return self._settings_dict['resolution'][self._settings_dict['profile']]
 
 
 class ConfigurationFileNotFound(FileNotFoundError):
     pass
 
 
-settings = Settings()
+env = getattr(Environment, os.environ.get('environment', 'test'))
+settings = Settings(env=env).as_dict()

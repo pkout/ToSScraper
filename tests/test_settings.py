@@ -1,17 +1,16 @@
 import sys
 import unittest
 from enum import Enum
-from pathlib import Path
 
 sys.path.append('src')
 
 from settings import ConfigurationFileNotFound
-from settings import Environment, Settings
+from settings import settings, Settings
 
 class TestSettings(unittest.TestCase):
 
     def setUp(self):
-        self.settings = Settings(Environment.test)
+        self.settings = Settings()
 
     def test_instantiates(self):
         self.assertIsInstance(self.settings, Settings)
@@ -24,4 +23,4 @@ class TestSettings(unittest.TestCase):
             Settings(StubEnvironment.nonsense)
 
     def test_as_dict_returns_settings_dict(self):
-        self.assertDictEqual(self.settings.as_dict(), {'a': 'b'})
+        self.assertEqual(settings['candleWidthPx'], 10)

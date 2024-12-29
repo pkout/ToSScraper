@@ -5,16 +5,13 @@ import image_utils
 
 class CandleScraper:
 
-    CANDLE_WIDTH_PX = 10
-    CANDLE_STEPS_COUNT = 10000
-    MOUSE_STEP_DURATION_SEC = 0.1
-
     def __init__(self, gui_controller, ticker_symbol):
         self._gui_controller = gui_controller
         self._ticker_symbol = ticker_symbol
         self._determine_first_candle_center_coords()
 
     def scrape(self):
+        print(settings)
         self._move_mouse_before_first_candle()
         candle_values = {'ohlcv': [], 'rsi': []}
 
@@ -47,11 +44,13 @@ class CandleScraper:
 
     def _determine_first_candle_center_coords(self):
         _, screen_height = self._gui_controller.size()
-        self._first_candle_center_xy = 300, screen_height / 2
+
+        self._first_candle_center_xy = (settings['firstCandleCenterX'],
+                                        screen_height / 2)
 
     def _move_mouse_before_first_candle(self):
         self._gui_controller.moveTo(
-            self._first_candle_center_xy[0] - self.CANDLE_WIDTH_PX,
+            self._first_candle_center_xy[0] - settings['candleWidthPx'],
             self._first_candle_center_xy[1],
             0
         )
@@ -59,12 +58,12 @@ class CandleScraper:
     def _move_cursor_towards_next_candle(self):
         print('Mouse stepping')
 
-        for _ in range(self.CANDLE_STEPS_COUNT):
+        for _ in range(settings['cursorStepsCount']):
             print('.', end='')
 
             self._gui_controller.moveRel(
                 1, 0,
-                duration=self.MOUSE_STEP_DURATION_SEC
+                duration=settings['cursorStepDurationSec']
             )
 
             yield
