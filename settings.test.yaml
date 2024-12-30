@@ -1,9 +1,10 @@
 profile: r2560x1440
+cursorStepsCount: 1
+cursorStepDurationSec: 0
+logLevel: ERROR
 resolution:
   r2560x1440:
     candleWidthPx: 10
-    cursorStepDurationSec: 0
-    cursorStepsCount: 1
     firstCandleCenterX: 300
     ohlcvScreenRegion:
       h: 15

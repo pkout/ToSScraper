@@ -1,17 +1,18 @@
 profile: r2560x1440
+cursorStepsCount: 10000
+cursorStepDurationSec: 0.01
+logLevel: INFO
 resolution:
   r2560x1440:
     candleWidthPx: 10
-    cursorStepDurationSec: 1
-    cursorStepsCount: 10000
     firstCandleCenterX: 300
     ohlcvScreenRegion:
       h: 15
-      w: 515
-      x: 325
+      w: 715
+      x: 238
       y: 125
     rsiScreenRegion:
       h: 17
-      w: 45
+      w: 37
       x: 430
       y: 1042

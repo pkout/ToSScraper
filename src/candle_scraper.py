@@ -1,7 +1,8 @@
-from screenshot_parsers import OHLCVParser, RSIParser
-
-from settings import settings
 import image_utils
+from screenshot_parsers import OHLCVParser, RSIParser
+from settings import settings, profiled_settings
+
+from log import logger
 
 class CandleScraper:
 
@@ -11,19 +12,18 @@ class CandleScraper:
         self._determine_first_candle_center_coords()
 
     def scrape(self):
-        print(settings)
         self._move_mouse_before_first_candle()
         candle_values = {'ohlcv': [], 'rsi': []}
 
         for _ in self._move_cursor_towards_next_candle():
             ohlcv_image = self._screenshot_candle_ohlcv_values()
             rsi_image = self._screenshot_candle_rsi_value()
-            rsi_image = image_utils.sharpen(rsi_image, 3)
 
             if self._did_read_all_ohlcv(ohlcv_image):
                 break
 
             ohlcv = self._read_ohlcv_from(ohlcv_image)
+            rsi_image = image_utils.sharpen(rsi_image, 3)
             rsi = self._read_rsi_from(rsi_image)
 
             if self._is_candle_already_read(ohlcv, candle_values):
@@ -45,18 +45,18 @@ class CandleScraper:
     def _determine_first_candle_center_coords(self):
         _, screen_height = self._gui_controller.size()
 
-        self._first_candle_center_xy = (settings['firstCandleCenterX'],
+        self._first_candle_center_xy = (profiled_settings['firstCandleCenterX'],
                                         screen_height / 2)
 
     def _move_mouse_before_first_candle(self):
         self._gui_controller.moveTo(
-            self._first_candle_center_xy[0] - settings['candleWidthPx'],
+            self._first_candle_center_xy[0] - profiled_settings['candleWidthPx'],
             self._first_candle_center_xy[1],
             0
         )
 
     def _move_cursor_towards_next_candle(self):
-        print('Mouse stepping')
+        logger.info('Mouse stepping')
 
         for _ in range(settings['cursorStepsCount']):
             print('.', end='')
@@ -69,13 +69,17 @@ class CandleScraper:
             yield
 
     def _screenshot_candle_ohlcv_values(self):
-        image = self._gui_controller.screenshot(region=(238, 125, 715, 15))
+        r = profiled_settings['ohlcvScreenRegion']
+        region_tuple = (r['x'], r['y'], r['w'], r['h'])
+        image = self._gui_controller.screenshot(region=region_tuple)
         image.save('last-ohlcv.png')
 
         return image
 
     def _screenshot_candle_rsi_value(self):
-        image = self._gui_controller.screenshot(region=(430, 1042, 37, 17))
+        r = profiled_settings['rsiScreenRegion']
+        region_tuple = (r['x'], r['y'], r['w'], r['h'])
+        image = self._gui_controller.screenshot(region=region_tuple)
         image.save('last-rsi.png')
 
         return image

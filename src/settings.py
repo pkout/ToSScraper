@@ -1,15 +1,12 @@
 import os
-
 from enum import Enum
 from pathlib import Path
 
 import yaml
 
-
 class Environment(Enum):
     dev = 'dev'
     test = 'test'
-
 
 class Settings:
 
@@ -26,12 +23,15 @@ class Settings:
             self._settings_dict = yaml.safe_load(f)
 
     def as_dict(self):
+        return self._settings_dict
+
+    def as_current_profile_dict(self):
         return self._settings_dict['resolution'][self._settings_dict['profile']]
 
 
 class ConfigurationFileNotFound(FileNotFoundError):
     pass
 
-
-env = getattr(Environment, os.environ.get('environment', 'test'))
+env = getattr(Environment, os.environ.get('ENVIRONMENT', 'test'))
 settings = Settings(env=env).as_dict()
+profiled_settings = Settings(env=env).as_current_profile_dict()

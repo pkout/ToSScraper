@@ -5,7 +5,7 @@ from enum import Enum
 sys.path.append('src')
 
 from settings import ConfigurationFileNotFound
-from settings import settings, Settings
+from settings import profiled_settings, settings, Settings
 
 class TestSettings(unittest.TestCase):
 
@@ -23,4 +23,7 @@ class TestSettings(unittest.TestCase):
             Settings(StubEnvironment.nonsense)
 
     def test_as_dict_returns_settings_dict(self):
-        self.assertEqual(settings['candleWidthPx'], 10)
+        self.assertEqual(settings['cursorStepsCount'], 1)
+
+    def test_as_current_profile_dict_returns_current_profile_dict(self):
+        self.assertEqual(profiled_settings['candleWidthPx'], 10)
