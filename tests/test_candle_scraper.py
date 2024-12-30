@@ -64,7 +64,7 @@ class TestCandleScraper(unittest.TestCase):
         self.assertDictEqual(
             candles_values['ohlcv'][0],
             {
-                'timestamp': 1655378100000, 'o': 1071.0, 'h': 1084.5,
+                't': 1655378100000, 'o': 1071.0, 'h': 1084.5,
                 'l': 1069.0, 'c': 1078.0, 'v': 2426
             }
         )
@@ -103,7 +103,7 @@ class TestCandleScraper(unittest.TestCase):
         self.assertDictEqual(
             first_candle_ohlcv,
             {
-                'timestamp': 1655378100000, 'o': 1071.0, 'h': 1084.5,
+                't': 1655378100000, 'o': 1071.0, 'h': 1084.5,
                 'l': 1069.0, 'c': 1078.0, 'v': 2426
             }
         )

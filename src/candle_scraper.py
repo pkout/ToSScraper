@@ -1,7 +1,6 @@
-import image_utils
+import utils
 from screenshot_parsers import OHLCVParser, RSIParser
 from settings import settings, profiled_settings
-
 from log import logger
 
 class CandleScraper:
@@ -16,14 +15,14 @@ class CandleScraper:
         candle_values = {'ohlcv': [], 'rsi': []}
 
         for _ in self._move_cursor_towards_next_candle():
-            ohlcv_image = self._screenshot_candle_ohlcv_values()
-            rsi_image = self._screenshot_candle_rsi_value()
+            ohlcv_image = self._screenshot_candle_ohlcv_text()
+            rsi_image = self._screenshot_candle_rsi_text()
 
-            if self._did_read_all_ohlcv(ohlcv_image):
+            if self._did_read_all_candles(ohlcv_image):
                 break
 
             ohlcv = self._read_ohlcv_from(ohlcv_image)
-            rsi_image = image_utils.sharpen(rsi_image, 3)
+            rsi_image = utils.sharpen_image(rsi_image, 3)
             rsi = self._read_rsi_from(rsi_image)
 
             if self._is_candle_already_read(ohlcv, candle_values):
@@ -68,7 +67,7 @@ class CandleScraper:
 
             yield
 
-    def _screenshot_candle_ohlcv_values(self):
+    def _screenshot_candle_ohlcv_text(self):
         r = profiled_settings['ohlcvScreenRegion']
         region_tuple = (r['x'], r['y'], r['w'], r['h'])
         image = self._gui_controller.screenshot(region=region_tuple)
@@ -76,7 +75,7 @@ class CandleScraper:
 
         return image
 
-    def _screenshot_candle_rsi_value(self):
+    def _screenshot_candle_rsi_text(self):
         r = profiled_settings['rsiScreenRegion']
         region_tuple = (r['x'], r['y'], r['w'], r['h'])
         image = self._gui_controller.screenshot(region=region_tuple)
@@ -84,7 +83,7 @@ class CandleScraper:
 
         return image
 
-    def _did_read_all_ohlcv(self, image):
+    def _did_read_all_candles(self, image):
         parser = OHLCVParser(image)
 
         return parser.is_past_last_ohlcv()
@@ -93,7 +92,7 @@ class CandleScraper:
         parser = OHLCVParser(image)
 
         ohlcv = {
-            'timestamp': parser.get_timestamp(),
+            't': parser.get_timestamp(),
             'o': parser.get_open(),
             'h': parser.get_high(),
             'l': parser.get_low(),
