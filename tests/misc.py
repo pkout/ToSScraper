@@ -1,6 +1,4 @@
-import sys
-
-sys.path.append('src')
+from PIL import Image
 
 from settings import settings
 
@@ -11,7 +9,7 @@ def patch_settings_file(*args):
     return settings
 
 def _args_tuple_to_dict(args):
-    _dict = {}
+    _dict, key = {}, None
 
     for i, v in enumerate(args):
         if i % 2 == 0:
@@ -33,3 +31,20 @@ def _update_setting(settings, key, value):
         s = s[t]
 
     s[key_tokens[-1]] = value
+
+
+class GuiControllerStub:
+
+    def __init__(self, image_path):
+        self._image = Image.open(image_path)
+
+    def screenshot(self, region=None):
+        if region is None:
+            return self._image
+
+        x1, y1 = region
+        x2 = x1 + region[2]
+        y2 = y1 + region[3]
+        result_image = self._image.crop(box=(x1, y1, x2, y2))
+
+        return result_image

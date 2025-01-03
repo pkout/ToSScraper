@@ -1,8 +1,5 @@
-import sys
 import unittest
 from enum import Enum
-
-sys.path.append('src')
 
 from settings import ConfigurationFileNotFound
 from settings import profiled_settings, settings, Settings

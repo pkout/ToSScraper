@@ -16,3 +16,11 @@ resolution:
       w: 45
       x: 430
       y: 1042
+    calendarPickerCenterCoords:
+      x: 2320
+      y: 58
+    calendarPickerFirstDayRegion:
+      h: 24
+      w: 28
+      x: 2217
+      y: 138

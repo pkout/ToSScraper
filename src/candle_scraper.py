@@ -1,7 +1,11 @@
+from pathlib import Path
+
 import utils
 from screenshot_parsers import OHLCVParser, RSIParser
 from settings import settings, profiled_settings
 from log import logger
+
+DIR = Path(__file__).parent
 
 class CandleScraper:
 
@@ -22,7 +26,6 @@ class CandleScraper:
                 break
 
             ohlcv = self._read_ohlcv_from(ohlcv_image)
-            rsi_image = utils.sharpen_image(rsi_image, 3)
             rsi = self._read_rsi_from(rsi_image)
 
             if self._is_candle_already_read(ohlcv, candle_values):
@@ -34,18 +37,20 @@ class CandleScraper:
         return candle_values
 
     def _is_candle_already_read(self, candle, candle_values):
-        timestamps = [k['timestamp'] for k in candle_values['ohlcv']]
+        timestamps = [k['t'] for k in candle_values['ohlcv']]
 
         candle_is_read = len(candle_values['ohlcv']) > 0 and \
-            candle['timestamp'] in timestamps
+            candle['t'] in timestamps
 
         return candle_is_read
 
     def _determine_first_candle_center_coords(self):
         _, screen_height = self._gui_controller.size()
 
-        self._first_candle_center_xy = (profiled_settings['firstCandleCenterX'],
-                                        screen_height / 2)
+        self._first_candle_center_xy = (
+            profiled_settings['firstCandleCenterX'],
+            screen_height / 2
+        )
 
     def _move_mouse_before_first_candle(self):
         self._gui_controller.moveTo(
@@ -71,7 +76,8 @@ class CandleScraper:
         r = profiled_settings['ohlcvScreenRegion']
         region_tuple = (r['x'], r['y'], r['w'], r['h'])
         image = self._gui_controller.screenshot(region=region_tuple)
-        image.save('last-ohlcv.png')
+        image = utils.sharpen_image(image, 5)
+        image.save(DIR.parent / Path('last-ohlcv.png'))
 
         return image
 
@@ -79,7 +85,8 @@ class CandleScraper:
         r = profiled_settings['rsiScreenRegion']
         region_tuple = (r['x'], r['y'], r['w'], r['h'])
         image = self._gui_controller.screenshot(region=region_tuple)
-        image.save('last-rsi.png')
+        image = utils.sharpen_image(image, 3)
+        image.save(DIR.parent / Path('last-rsi.png'))
 
         return image
 

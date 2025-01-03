@@ -1,22 +1,25 @@
 import json
-import sys
 import tempfile
 import unittest
 from unittest.mock import Mock
 from pathlib import Path
 
-sys.path.append('src')
-
 from main import TickerSymbolScraper
 from candle_scraper import CandleScraper
+from chart_paginator import ChartPaginator
 
 FIXTURES_DIR = Path(__file__).parent / Path('fixtures')
 
 class TestTickerSymbolScraper(unittest.TestCase):
 
     def setUp(self):
+        self.mock_chart_paginator = Mock(spec=ChartPaginator)
         self.mock_candle_scraper = Mock(spec=CandleScraper)
-        self.scraper = TickerSymbolScraper(self.mock_candle_scraper)
+
+        self.scraper = TickerSymbolScraper(
+            self.mock_chart_paginator,
+            self.mock_candle_scraper
+        )
 
     def test_instantiates(self):
         self.assertIsInstance(self.scraper, TickerSymbolScraper)

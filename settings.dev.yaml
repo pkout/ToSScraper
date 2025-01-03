@@ -9,10 +9,18 @@ resolution:
     ohlcvScreenRegion:
       h: 15
       w: 715
-      x: 238
-      y: 125
+      x: 235
+      y: 118
     rsiScreenRegion:
-      h: 17
+      h: 15
       w: 37
       x: 430
-      y: 1042
+      y: 1039
+    calendarPickerCenterCoords:
+      x: 2320
+      y: 58
+    calendarPickerFirstDayRegion:
+      h: 24
+      w: 28
+      x: 2217
+      y: 138

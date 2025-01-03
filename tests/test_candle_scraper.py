@@ -1,28 +1,24 @@
 import unittest
-import sys
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pyautogui
 from PIL import Image
 
-from misc import patch_settings_file
-
-sys.path.append('src')
-
+from .misc import patch_settings_file
 from candle_scraper import CandleScraper
 
 FIXTURES_DIR = Path(__file__).parent / Path('fixtures')
 
 class TestCandleScraper(unittest.TestCase):
 
-    def _mock_gui_controller(self):
-        self.mock_gui_controller = Mock(spec=pyautogui)
-        self.mock_gui_controller.size.return_value = 300, 500
-
     def setUp(self):
         self._mock_gui_controller()
         self.scraper = CandleScraper(self.mock_gui_controller, 'uvix')
+
+    def _mock_gui_controller(self):
+        self.mock_gui_controller = Mock(spec=pyautogui)
+        self.mock_gui_controller.size.return_value = 300, 500
 
     def tearDown(self):
         if hasattr(self, 'ohlcv_screenshot'):

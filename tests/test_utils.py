@@ -1,13 +1,9 @@
 import shutil
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-sys.path.append('src')
-
 import utils
-
 
 class TestUtils(unittest.TestCase):
 
