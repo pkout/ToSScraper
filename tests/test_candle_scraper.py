@@ -108,11 +108,29 @@ class TestCandleScraper(unittest.TestCase):
 
     @patch('candle_scraper.settings', patch_settings_file('cursorStepsCount', 1))
     def test_scrape_returns_minus_one_rsi_value_if_screenshot_not_readable(self):
-        self._prepare_single_corrupt_candle()
+        self._prepare_single_corrupt_rsi_candle()
 
         candles_values = self.scraper.scrape()
 
         self.assertEqual(candles_values['rsi'][0]['rsi'], -1)
+
+    @patch('candle_scraper.settings', patch_settings_file('cursorStepsCount', 1))
+    def test_scrape_saves_failing_input_screenshot_if_failed_parsing_ohlcv(self):
+        self._prepare_single_corrupt_ohlcv_candle()
+        save_file_path = Path(__file__).parent.parent / \
+                         Path('ohlcv-1655378100000.png')
+
+        save_file_path.unlink(missing_ok=True)
+
+        candle_values = self.scraper.scrape()
+
+        self.assertDictEqual(
+            candle_values['ohlcv'][0],
+            {'t': 1655378100000, 'c': -1, 'h': -1, 'l': -1, 'o': -1, 'v': -1}
+        )
+
+        self.assertTrue(save_file_path.exists())
+        save_file_path.unlink()
 
     def _prepare_two_identical_candles(self):
         self.ohlcv_screenshot = Image.open(FIXTURES_DIR / Path('ohlcv.jpg'))
@@ -139,13 +157,16 @@ class TestCandleScraper(unittest.TestCase):
                                                            self.ohlcv_screenshot2,
                                                            self.rsi_screenshot2]
 
-    def _prepare_single_corrupt_candle(self):
+    def _prepare_single_corrupt_ohlcv_candle(self):
+        self.ohlcv_screenshot = Image.open(FIXTURES_DIR / Path('ohlcv-corrupt.jpg'))
+        self.rsi_screenshot = Image.open(FIXTURES_DIR / Path('rsi.jpg'))
+
+        self.mock_gui_controller.screenshot.side_effect = [self.ohlcv_screenshot,
+                                                           self.rsi_screenshot]
+
+    def _prepare_single_corrupt_rsi_candle(self):
         self.ohlcv_screenshot = Image.open(FIXTURES_DIR / Path('ohlcv.jpg'))
         self.rsi_screenshot = Image.open(FIXTURES_DIR / Path('rsi-corrupt.jpg'))
 
         self.mock_gui_controller.screenshot.side_effect = [self.ohlcv_screenshot,
                                                            self.rsi_screenshot]
-
-
-if __name__ == '__main__':
-    unittest.main()

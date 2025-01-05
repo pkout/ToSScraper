@@ -5,6 +5,7 @@ import pyautogui
 
 from candle_scraper import CandleScraper
 from chart_paginator import ChartPaginator
+from settings import settings
 import utils
 
 class TickerSymbolScraper:
@@ -14,10 +15,10 @@ class TickerSymbolScraper:
         self._candle_scraper = candle_scraper
 
     def scrape_candles_in_date_range(self, symbol, chart_pages_count_to_read=None):
-        self._chart_paginator.next_page()
-        candles_values = self._candle_scraper.scrape()
-
-        return candles_values
+        for i in range(settings['numOfPagesToScrape']):
+            self._chart_paginator.next_page()
+            candles_values = self._candle_scraper.scrape()
+            self.save(candles_values, _save_file_path(symbol, i))
 
     def save(self, _dict, path):
         if _dict is None:
@@ -28,15 +29,13 @@ class TickerSymbolScraper:
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(_dict, f, indent=4)
 
-def _save_file_path(symbol):
+def _save_file_path(symbol, index):
     dir_path = Path(__file__).parent / Path('data')
-    return dir_path / Path(f'{symbol}.json')
+    return dir_path / Path(f'{symbol}-{index}.json')
 
 if __name__ == '__main__':
     _symbol = 'UVIX'
-
     candle_scraper = CandleScraper(pyautogui, _symbol)
     chart_paginator = ChartPaginator(pyautogui)
     scraper = TickerSymbolScraper(chart_paginator, candle_scraper)
-    candle_values = scraper.scrape_candles_in_date_range(_symbol)
-    scraper.save(candle_values, _save_file_path(_symbol))
+    scraper.scrape_candles_in_date_range(_symbol)

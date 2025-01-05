@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import utils
@@ -98,14 +99,34 @@ class CandleScraper:
     def _read_ohlcv_from(self, image):
         parser = OHLCVParser(image)
 
-        ohlcv = {
-            't': parser.get_timestamp(),
-            'o': parser.get_open(),
-            'h': parser.get_high(),
-            'l': parser.get_low(),
-            'c': parser.get_close(),
-            'v': parser.get_volume()
-        }
+        try:
+            ohlcv = {
+                't': parser.get_timestamp(),
+                'o': parser.get_open(),
+                'h': parser.get_high(),
+                'l': parser.get_low(),
+                'c': parser.get_close(),
+                'v': parser.get_volume()
+            }
+        except ValueError as e:
+            logger.error('OHLCV parsing error below. '
+                         f'Timestamp {parser.get_timestamp()}')
+
+            logger.error(e)
+
+            shutil.copy(
+                DIR.parent / Path('last-ohlcv.png'),
+                DIR.parent / Path(f'ohlcv-{parser.get_timestamp()}.png')
+            )
+
+            ohlcv = {
+                't': parser.get_timestamp(),
+                'o': -1,
+                'h': -1,
+                'l': -1,
+                'c': -1,
+                'v': -1
+            }
 
         return ohlcv
 
@@ -114,7 +135,7 @@ class CandleScraper:
         rsi_value = parser.get_rsi()
 
         if rsi_value is None:
-            # This value will be easy to identify and replace
+            # This anomalous value will be easy to identify and replace
             # in the output file.
             rsi_value = -1
 

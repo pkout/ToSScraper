@@ -1,12 +1,13 @@
 import json
 import tempfile
 import unittest
-from unittest.mock import Mock
+from unittest.mock import ANY, Mock, patch
 from pathlib import Path
 
 from main import TickerSymbolScraper
 from candle_scraper import CandleScraper
 from chart_paginator import ChartPaginator
+from .misc import patch_settings_file
 
 FIXTURES_DIR = Path(__file__).parent / Path('fixtures')
 
@@ -24,13 +25,15 @@ class TestTickerSymbolScraper(unittest.TestCase):
     def test_instantiates(self):
         self.assertIsInstance(self.scraper, TickerSymbolScraper)
 
+    @patch('main.settings', patch_settings_file('numOfPagesToScrape', 1))
     def test_scrape_returns_expected_value_dict(self):
         expected_dict = {'my': 'data'}
         self.mock_candle_scraper.scrape.return_value = expected_dict
+        self.scraper.save = Mock()
 
-        candles_values = self.scraper.scrape_candles_in_date_range('uvix')
+        self.scraper.scrape_candles_in_date_range('uvix')
 
-        self.assertDictEqual(candles_values, expected_dict)
+        self.scraper.save.assert_called_once_with(expected_dict, ANY)
 
     def test_save_raises_if_dict_is_none(self):
         path = Path(tempfile.gettempdir()) / Path('test_save_saves_symbol_values_to_file.json')
@@ -48,6 +51,3 @@ class TestTickerSymbolScraper(unittest.TestCase):
             file_json = json.load(f)
 
         self.assertDictEqual(file_json, dict_to_save)
-
-if __name__ == '__main__':
-    unittest.main()

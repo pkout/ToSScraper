@@ -33,18 +33,54 @@ def _update_setting(settings, key, value):
     s[key_tokens[-1]] = value
 
 
-class GuiControllerStub:
+class GuiControllerFake:
 
-    def __init__(self, image_path):
-        self._image = Image.open(image_path)
+    def __init__(self, images_paths):
+        self._images = [Image.open(img_path) for img_path in images_paths]
+        self._clicks = []
+        self._presses = []
+        self._typewrites = []
+        self._screenshot_call_count = 0
+
+    def __del__(self):
+        for img in self._images:
+            img.close()
+
+    @property
+    def clicks(self):
+        return self._clicks
+
+    @property
+    def presses(self):
+        return self._presses
+
+    @property
+    def typewrites(self):
+        return self._typewrites
 
     def screenshot(self, region=None):
-        if region is None:
-            return self._image
+        if len(self._images) == 1:
+            img_idx = 0
+        else:
+            img_idx = self._screenshot_call_count
 
-        x1, y1 = region
-        x2 = x1 + region[2]
-        y2 = y1 + region[3]
-        result_image = self._image.crop(box=(x1, y1, x2, y2))
+        if region is None:
+            return self._images[img_idx]
+
+        x1, y1, w, h = region
+        x2, y2 = x1 + w, y1 + h
+        result_image = self._images[img_idx]
+        result_image = result_image.crop(box=(x1, y1, x2, y2))
+
+        self._screenshot_call_count += 1
 
         return result_image
+
+    def click(self, x, y):
+        self._clicks.append((x, y))
+
+    def press(self, key, repeat_count):
+        self._presses.append((key, repeat_count))
+
+    def typewrite(self, text):
+        self._typewrites.append(text)

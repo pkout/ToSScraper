@@ -2,6 +2,7 @@ profile: r2560x1440
 cursorStepsCount: 1
 cursorStepDurationSec: 0
 logLevel: ERROR
+numOfPagesToScrape: 1
 resolution:
   r2560x1440:
     candleWidthPx: 10
@@ -19,8 +20,22 @@ resolution:
     calendarPickerCenterCoords:
       x: 2320
       y: 58
-    calendarPickerFirstDayRegion:
-      h: 24
+    calendarNextMonthButtonCenterCoords:
+      x: 2386
+      y: 91
+    calendarFirstDayRegion:
+      h: 22
       w: 28
       x: 2217
-      y: 138
+      y: 135
+    bufferingStatusRegion:
+      h: 17
+      w: 75
+      x: 80
+      y: 30
+    timeFieldInsideCoords:
+      x: 2270
+      y: 280
+    calendarGoButtonCenterCoords:
+      x: 2388
+      y: 288

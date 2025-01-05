@@ -33,31 +33,31 @@ class OHLCVParser:
 
     def get_month(self):
         m = re.match(self.TOKEN_REGEXES['mm/dd/yy'], self._tokens[1])
-        month = int(self._replace_misread_digits(m.group(1)))
+        month = int(self._replace_misread_characters(m.group(1)))
 
         return month
 
     def get_day(self):
         m = re.match(self.TOKEN_REGEXES['mm/dd/yy'], self._tokens[1])
-        day = int(self._replace_misread_digits(m.group(2)))
+        day = int(self._replace_misread_characters(m.group(2)))
 
         return day
 
     def get_year(self):
         m = re.match(self.TOKEN_REGEXES['mm/dd/yy'], self._tokens[1])
-        year = int(self._replace_misread_digits(m.group(3)))
+        year = int(self._replace_misread_characters(m.group(3)))
 
         return year
 
     def get_hour(self):
         m = re.match(self.TOKEN_REGEXES['hh[:;]mm ampm'], self._tokens[1])
-        hour = int(self._replace_misread_digits(m.group(1)))
+        hour = int(self._replace_misread_characters(m.group(1)))
 
         return hour
 
     def get_minute(self):
         m = re.match(self.TOKEN_REGEXES['hh[:;]mm ampm'], self._tokens[1])
-        minute = int(self._replace_misread_digits(m.group(2)))
+        minute = int(self._replace_misread_characters(m.group(2)))
 
         return minute
 
@@ -72,31 +72,31 @@ class OHLCVParser:
 
     def get_open(self):
         m = re.match(self.TOKEN_REGEXES['open'], self._tokens[2])
-        open = float(self._replace_misread_digits(m.group(1)))
+        open = float(self._replace_misread_characters(m.group(1)))
 
         return open
 
     def get_high(self):
         m = re.match(self.TOKEN_REGEXES['high'], self._tokens[3])
-        high = float(self._replace_misread_digits(m.group(1)))
+        high = float(self._replace_misread_characters(m.group(1)))
 
         return high
 
     def get_low(self):
         m = re.match(self.TOKEN_REGEXES['low'], self._tokens[4])
-        low = float(self._replace_misread_digits(m.group(1)))
+        low = float(self._replace_misread_characters(m.group(1)))
 
         return low
 
     def get_close(self):
         m = re.match(self.TOKEN_REGEXES['close'], self._tokens[5])
-        close = float(self._replace_misread_digits(m.group(1)))
+        close = float(self._replace_misread_characters(m.group(1)))
 
         return close
 
     def get_volume(self):
         m = re.match(self.TOKEN_REGEXES['volume'], self._tokens[10])
-        volume = int(self._replace_misread_digits(m.group(1).replace(',', '')))
+        volume = int(self._replace_misread_characters(m.group(1).replace(',', '')))
 
         return volume
 
@@ -127,10 +127,11 @@ class OHLCVParser:
 
         return timestamp
 
-    def _replace_misread_digits(self, text):
+    def _replace_misread_characters(self, text):
         text = text.replace('&', '8')
         text = text.replace('i', '1')
         text = text.replace('I', '1')
+        text = text.replace(',', '.')
 
         return text
 
@@ -149,6 +150,23 @@ class RSIParser:
         if m is None:
             return
 
-        self._g = m.groups()
+        g = m.groups()
 
-        return float(self._g[0].replace(',', '.'))
+        return float(g[0].replace(',', '.'))
+
+class BufferingStatusParser:
+
+    PATTERN = r'(.*)'
+
+    def __init__(self, image):
+        self.text = pytesseract.image_to_string(image, lang='eng')
+
+    def get_buffering_status(self):
+        m = re.match(self.PATTERN, self.text)
+
+        if m is None:
+            return
+
+        g = m.groups()
+
+        return g[0]
