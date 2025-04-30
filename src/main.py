@@ -3,10 +3,11 @@ from pathlib import Path
 
 import pyautogui
 
+import utils
 from candle_scraper import CandleScraper
 from chart_paginator import ChartPaginator
 from settings import settings
-import utils
+
 
 class TickerSymbolScraper:
 
@@ -15,10 +16,10 @@ class TickerSymbolScraper:
         self._candle_scraper = candle_scraper
 
     def scrape_candles_in_date_range(self, symbol, chart_pages_count_to_read=None):
-        for i in range(settings['numOfPagesToScrape']):
+        for page_idx in range(settings['numOfPagesToScrape']):
             self._chart_paginator.next_page()
             candles_values = self._candle_scraper.scrape()
-            self.save(candles_values, _save_file_path(symbol, i))
+            self.save(candles_values, _save_file_path(symbol, page_idx + 1))
 
     def save(self, _dict, path):
         if _dict is None:
@@ -30,7 +31,7 @@ class TickerSymbolScraper:
             json.dump(_dict, f, indent=4)
 
 def _save_file_path(symbol, index):
-    dir_path = Path(__file__).parent / Path('data')
+    dir_path = Path(__file__).parent.parent / Path('data')
     return dir_path / Path(f'{symbol}-{index}.json')
 
 if __name__ == '__main__':

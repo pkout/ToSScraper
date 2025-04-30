@@ -2,7 +2,7 @@ profile: r2560x1440
 cursorStepsCount: 10000
 cursorStepDurationSec: 0.01
 logLevel: INFO
-numOfPagesToScrape: 3
+numOfPagesToScrape: 30
 resolution:
   r2560x1440:
     candleWidthPx: 10

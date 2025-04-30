@@ -2,9 +2,9 @@ import shutil
 from pathlib import Path
 
 import utils
+from log import logger, LOG_DIR
 from screenshot_parsers import OHLCVParser, RSIParser
 from settings import settings, profiled_settings
-from log import logger
 
 DIR = Path(__file__).parent
 
@@ -22,11 +22,11 @@ class CandleScraper:
         for _ in self._move_cursor_towards_next_candle():
             ohlcv_image = self._screenshot_candle_ohlcv_text()
             rsi_image = self._screenshot_candle_rsi_text()
+            ohlcv = self._read_ohlcv_from(ohlcv_image)
 
-            if self._did_read_all_candles(ohlcv_image):
+            if self._did_read_all_candles(ohlcv):
                 break
 
-            ohlcv = self._read_ohlcv_from(ohlcv_image)
             rsi = self._read_rsi_from(rsi_image)
 
             if self._is_candle_already_read(ohlcv, candle_values):
@@ -61,11 +61,7 @@ class CandleScraper:
         )
 
     def _move_cursor_towards_next_candle(self):
-        logger.info('Mouse stepping')
-
         for _ in range(settings['cursorStepsCount']):
-            print('.', end='')
-
             self._gui_controller.moveRel(
                 1, 0,
                 duration=settings['cursorStepDurationSec']
@@ -91,13 +87,14 @@ class CandleScraper:
 
         return image
 
-    def _did_read_all_candles(self, image):
-        parser = OHLCVParser(image)
-
-        return parser.is_past_last_ohlcv()
+    def _did_read_all_candles(self, candle):
+        return not candle
 
     def _read_ohlcv_from(self, image):
         parser = OHLCVParser(image)
+
+        if parser.is_past_last_ohlcv():
+            return False
 
         try:
             ohlcv = {
@@ -108,27 +105,29 @@ class CandleScraper:
                 'c': parser.get_close(),
                 'v': parser.get_volume()
             }
-        except ValueError as e:
-            logger.error('OHLCV parsing error below. '
-                         f'Timestamp {parser.get_timestamp()}')
-
-            logger.error(e)
-
-            shutil.copy(
-                DIR.parent / Path('last-ohlcv.png'),
-                DIR.parent / Path(f'ohlcv-{parser.get_timestamp()}.png')
+        except (AttributeError, ValueError) as e:
+            self._log_error_and_save_screenshot(
+                parser.get_timestamp(),
+                e
             )
 
             ohlcv = {
                 't': parser.get_timestamp(),
-                'o': -1,
-                'h': -1,
-                'l': -1,
-                'c': -1,
-                'v': -1
+                'o': -1, 'h': -1, 'l': -1,
+                'c': -1, 'v': -1
             }
 
         return ohlcv
+
+    def _log_error_and_save_screenshot(self, timestamp, error):
+        logger.error(f'OHLCV parsing error below (timestamp {timestamp}):')
+
+        logger.error(error)
+
+        shutil.copy(
+            DIR.parent / Path('last-ohlcv.png'),
+            LOG_DIR / Path(f'ohlcv-{timestamp}.png')
+        )
 
     def _read_rsi_from(self, image):
         parser = RSIParser(image)

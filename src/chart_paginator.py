@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from settings import profiled_settings
 from screenshot_parsers import BufferingStatusParser
+from settings import profiled_settings
 
 DIR = Path(__file__).parent
 
@@ -68,10 +68,10 @@ class ChartPaginator:
                 region=(x, y, w, h)
             )
 
-            save_file_path = DIR.parent / \
-                Path(f'day_{picker_row_idx}_{picker_column_idx}.png')
+            #save_file_path = DIR.parent / \
+            #    Path(f'day_{picker_row_idx}_{picker_column_idx}.png')
 
-            btn_screenshot.save(save_file_path)
+            #btn_screenshot.save(save_file_path)
 
             if self._is_first_market_open_day_button(btn_screenshot):
                 btn_center_x = x + w // 2

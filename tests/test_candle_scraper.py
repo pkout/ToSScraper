@@ -7,6 +7,7 @@ from PIL import Image
 
 from .misc import patch_settings_file
 from candle_scraper import CandleScraper
+from log import LOG_DIR
 
 FIXTURES_DIR = Path(__file__).parent / Path('fixtures')
 
@@ -84,7 +85,8 @@ class TestCandleScraper(unittest.TestCase):
     def test_scrape_returns_accumulated_candle_values_after_last_candle_read(self):
         # Read 2 candles, but the first candle was the last one,
         # so when reading the second one, it should break out of
-        # the reading loop and return the accumulated candle values.
+        # the reading loop and return the accumulated candle values
+        # (1 candle).
         self._prepare_two_unique_candles()
 
         candles_values = self.scraper.scrape()
@@ -92,7 +94,7 @@ class TestCandleScraper(unittest.TestCase):
         first_candle_ohlcv = candles_values['ohlcv'][0]
         first_candle_rsi = candles_values['rsi'][0]
 
-        # Check that only the first first candle values were returned.
+        # Check that only the first candle values were returned.
         self.assertEqual(len(candles_values['ohlcv']), 1)
         self.assertEqual(len(candles_values['rsi']), 1)
 
@@ -115,11 +117,9 @@ class TestCandleScraper(unittest.TestCase):
         self.assertEqual(candles_values['rsi'][0]['rsi'], -1)
 
     @patch('candle_scraper.settings', patch_settings_file('cursorStepsCount', 1))
-    def test_scrape_saves_failing_input_screenshot_if_failed_parsing_ohlcv(self):
+    def test_scrape_return_minus_one_and_saves_failing_ohlcv_input_screenshot_it_is_not_readable(self):
         self._prepare_single_corrupt_ohlcv_candle()
-        save_file_path = Path(__file__).parent.parent / \
-                         Path('ohlcv-1655378100000.png')
-
+        save_file_path = LOG_DIR / Path('ohlcv-1655378100000.png')
         save_file_path.unlink(missing_ok=True)
 
         candle_values = self.scraper.scrape()

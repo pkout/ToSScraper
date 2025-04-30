@@ -5,6 +5,7 @@ import pytesseract
 
 from log import logger
 
+
 class OHLCVParser:
 
     # Sample input: 'UVIX 30 D 15m | D: 6/16/22, 11:15 AM | O: 1071 | H: 1084.5 | L: 1069 | C: 1078 | R: 15.5 | ¥: 783.77 | FPL: $5,199.50 | Volume | 2,426 | SimpleMovingAvg (CLOSE, 15, 0, no) | 1073.03'
@@ -20,7 +21,7 @@ class OHLCVParser:
     }
 
     def __init__(self, image):
-        text = pytesseract.image_to_string(image)
+        text = pytesseract.image_to_string(image, lang='eng').strip()
         logger.info(f'Parsing OHLCV: {text}')
         self._tokenize(text)
 
@@ -29,6 +30,10 @@ class OHLCVParser:
         text = text.replace('}', '|')
         text = text.replace(']', '|')
         text = text.replace('[', '|')
+        text = text.replace('[|', '|')
+        text = text.replace(']|', '|')
+        text = text.replace('|[', '|')
+        text = text.replace('|]', '|')
         self._tokens = [t.strip() for t in text.split('|')]
 
     def get_month(self):
@@ -141,7 +146,7 @@ class RSIParser:
     PATTERN = r'[^\d]*(\d+[\.,]\d+)'
 
     def __init__(self, image):
-        self.text = pytesseract.image_to_string(image, lang='eng')
+        self.text = pytesseract.image_to_string(image, lang='eng').strip()
         logger.info(f'Parsing RSI: {self.text}')
 
     def get_rsi(self):
@@ -159,7 +164,7 @@ class BufferingStatusParser:
     PATTERN = r'(.*)'
 
     def __init__(self, image):
-        self.text = pytesseract.image_to_string(image, lang='eng')
+        self.text = pytesseract.image_to_string(image, lang='eng').strip()
 
     def get_buffering_status(self):
         m = re.match(self.PATTERN, self.text)
