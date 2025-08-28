@@ -12,7 +12,7 @@ class OHLCVParser:
 
     TOKEN_REGEXES = {
         'mm/dd/yy': r'.*D:\s*(\d+)/(\d+)/(\d+)',
-        'hh[:;]mm ampm': r'.*D:.*,\s*(\d+)[:;i](\d+)\s*(AM|PM)',
+        'hh[:;]mm ampm': r'.*D:.*\s+(\d+)[:;i](\d+)\s*(AM|PM)',
         'open': r'.*[:;i]\s*(.*)',
         'high': r'.*[:;i]\s*(.*)',
         'low': r'.*[:;i]\s*(.*)',
@@ -21,20 +21,20 @@ class OHLCVParser:
     }
 
     def __init__(self, image):
-        text = pytesseract.image_to_string(image, lang='eng').strip()
-        logger.info(f'Parsing OHLCV: {text}')
-        self._tokenize(text)
+        self._text = pytesseract.image_to_string(image, lang='eng').strip()
+        logger.info(f'Parsing OHLCV: {self._text}')
+        self._tokenize()
 
-    def _tokenize(self, text):
-        text = text.replace('{', '|')
-        text = text.replace('}', '|')
-        text = text.replace(']', '|')
-        text = text.replace('[', '|')
-        text = text.replace('[|', '|')
-        text = text.replace(']|', '|')
-        text = text.replace('|[', '|')
-        text = text.replace('|]', '|')
-        self._tokens = [t.strip() for t in text.split('|')]
+    def _tokenize(self):
+        self._text = self._text.replace('{', '|')
+        self._text = self._text.replace('}', '|')
+        self._text = self._text.replace(']', '|')
+        self._text = self._text.replace('[', '|')
+        self._text = self._text.replace('[|', '|')
+        self._text = self._text.replace(']|', '|')
+        self._text = self._text.replace('|[', '|')
+        self._text = self._text.replace('|]', '|')
+        self._tokens = [t.strip() for t in self._text.split('|')]
 
     def get_month(self):
         m = re.match(self.TOKEN_REGEXES['mm/dd/yy'], self._tokens[1])
@@ -100,7 +100,8 @@ class OHLCVParser:
         return close
 
     def get_volume(self):
-        m = re.match(self.TOKEN_REGEXES['volume'], self._tokens[10])
+        volume_index = 9 if '¥' in self._text else 8
+        m = re.match(self.TOKEN_REGEXES['volume'], self._tokens[volume_index])
         volume = int(self._replace_misread_characters(m.group(1).replace(',', '')))
 
         return volume
@@ -146,11 +147,11 @@ class RSIParser:
     PATTERN = r'[^\d]*(\d+[\.,]\d+)'
 
     def __init__(self, image):
-        self.text = pytesseract.image_to_string(image, lang='eng').strip()
-        logger.info(f'Parsing RSI: {self.text}')
+        self._text = pytesseract.image_to_string(image, lang='eng').strip()
+        logger.info(f'Parsing RSI: {self._text}')
 
     def get_rsi(self):
-        m = re.match(self.PATTERN, self.text)
+        m = re.match(self.PATTERN, self._text)
 
         if m is None:
             return
@@ -164,10 +165,10 @@ class BufferingStatusParser:
     PATTERN = r'(.*)'
 
     def __init__(self, image):
-        self.text = pytesseract.image_to_string(image, lang='eng').strip()
+        self._text = pytesseract.image_to_string(image, lang='eng').strip()
 
     def get_buffering_status(self):
-        m = re.match(self.PATTERN, self.text)
+        m = re.match(self.PATTERN, self._text)
 
         if m is None:
             return

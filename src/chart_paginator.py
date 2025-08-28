@@ -28,15 +28,13 @@ class ChartPaginator:
 
     def _wait_for_buffering_to_finish(self):
         while True:
-            self._state = 'Prebuffering'
-
-            buffering_status_parser = BufferingStatusParser(
-                self._find_buffering_status_image()
-            )
-
+            self._state = 'Prebuffering.'
+            buffering_image = self._find_buffering_status_image()
+            buffering_image.save(DIR.parent / Path('buffering.png'))
+            buffering_status_parser = BufferingStatusParser(buffering_image)
             status = buffering_status_parser.get_buffering_status()
 
-            if status != 'Prebuffering':
+            if status != 'Prebuffering.':
                 self._state = 'Prebuffered'
                 break
 
@@ -68,10 +66,10 @@ class ChartPaginator:
                 region=(x, y, w, h)
             )
 
-            #save_file_path = DIR.parent / \
-            #    Path(f'day_{picker_row_idx}_{picker_column_idx}.png')
+            save_file_path = DIR.parent / \
+                Path(f'day_{picker_row_idx}_{picker_column_idx}.png')
 
-            #btn_screenshot.save(save_file_path)
+            btn_screenshot.save(save_file_path)
 
             if self._is_first_market_open_day_button(btn_screenshot):
                 btn_center_x = x + w // 2
