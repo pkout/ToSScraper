@@ -5,7 +5,7 @@ logLevel: INFO
 numOfPagesToScrape: 30
 resolution:
   r2560x1440:
-    candleWidthPx: 10
+    candleWidthPx: 48
     firstCandleCenterX: 300
     ohlcvScreenRegion:
       h: 15
